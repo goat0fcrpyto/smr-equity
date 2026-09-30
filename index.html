@@ -15,91 +15,95 @@
     --fg: #f0f0f0;
     --muted: #7c7c80;
     --faint: #3d3d40;
-    --line: rgba(255, 255, 255, 0.08);
-    --line-hover: rgba(255, 255, 255, 0.22);
+    --line: rgba(255, 255, 255, 0.09);
+    --line-hover: rgba(255, 255, 255, 0.24);
     --up: #4fae7c;
     --down: #c45c5c;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); }
   body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     color: var(--fg);
     font-family: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
-    position: relative;
     overflow-x: hidden;
   }
 
-  /* background: soft glow + fading grid */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(60% 45% at 50% 32%, rgba(255, 255, 255, 0.07), transparent 70%),
-      linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 64px 64px,
-      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 64px 64px;
-    -webkit-mask-image: radial-gradient(70% 60% at 50% 35%, #000 20%, transparent 85%);
-    mask-image: radial-gradient(70% 60% at 50% 35%, #000 20%, transparent 85%);
-    opacity: 0.55;
-  }
-
-  main {
-    position: relative;
-    z-index: 1;
-    flex: 1;
+  /* scroll stage: tall section, sticky viewport inside */
+  .stage { position: relative; height: 320vh; }
+  .sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px 0 40px;
-    text-align: center;
   }
 
+  .glow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 120vmax;
+    height: 120vmax;
+    transform: translate(-50%, -50%) scale(var(--gs, 0.6));
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03) 45%, transparent 70%);
+    opacity: var(--go, 0.6);
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  .logo-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    transform: translateY(var(--ly, 0)) scale(var(--ls, 1));
+  }
   .logo {
-    width: min(960px, 100vw);
+    width: min(1000px, 100vw, calc(100svh * 16 / 9));
     aspect-ratio: 16 / 9;
     object-fit: contain;
     display: block;
     mix-blend-mode: lighten;
-    animation: rise 1.1s cubic-bezier(.2, .7, .2, 1) both;
+    animation: intro 1.6s cubic-bezier(.16, 1, .3, 1) both;
   }
 
   .contact {
-    margin-top: 0;
+    position: relative;
+    z-index: 2;
     display: grid;
-    padding: 0 24px;
-    grid-template-columns: repeat(2, minmax(0, 280px));
+    grid-template-columns: repeat(2, minmax(0, 290px));
     gap: 16px;
-    animation: rise 1.1s .25s cubic-bezier(.2, .7, .2, 1) both;
+    padding: 0 24px;
+    margin-top: 34vh;
   }
   .card {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     align-items: center;
-    padding: 20px 22px;
+    gap: 10px;
+    padding: 22px 20px;
     text-align: center;
     text-decoration: none;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.015);
-    transition: border-color .25s, background .25s, transform .25s;
+    border-radius: 12px;
+    background: #000;
+    opacity: var(--co, 0);
+    transform: translateY(var(--cy, 60px)) scale(var(--cs, 0.94));
+    filter: blur(var(--cb, 12px));
+    pointer-events: var(--pe, none);
+    will-change: transform, opacity, filter;
   }
-  .card:hover {
-    border-color: var(--line-hover);
-    background: rgba(255, 255, 255, 0.04);
-    transform: translateY(-2px);
-  }
+  .card .inner { transition: transform .3s cubic-bezier(.16, 1, .3, 1); display: contents; }
+  .card:hover { border-color: var(--line-hover); }
   .label {
     display: block;
     width: 100%;
-    text-align: center;
     padding-left: 0.3em;
     font-size: 0.6rem;
     font-weight: 500;
@@ -110,105 +114,136 @@
   .mail {
     display: block;
     width: 100%;
-    text-align: center;
-    font-size: 0.86rem;
+    font-size: 0.88rem;
     font-weight: 300;
     letter-spacing: 0.02em;
     color: var(--fg);
   }
 
-  /* ticker */
+  .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.55rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--faint);
+    opacity: var(--ho, 1);
+    transition: opacity .2s;
+  }
+  .hint i {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(var(--muted), transparent);
+    animation: drip 2.2s ease-in-out infinite;
+    transform-origin: top;
+  }
+
+  /* after the stage */
   .ticker {
     position: relative;
-    z-index: 1;
     overflow: hidden;
     white-space: nowrap;
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
-    background: rgba(0, 0, 0, 0.6);
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
     mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
   }
-  .track {
-    display: inline-flex;
-    padding: 15px 0;
-    animation: scroll 70s linear infinite;
-  }
+  .track { display: inline-flex; padding: 15px 0; animation: scroll 70s linear infinite; }
   .ticker:hover .track { animation-play-state: paused; }
   .item {
     display: inline-flex;
     align-items: baseline;
     gap: 10px;
-    padding: 0 30px;
+    padding: 0 28px;
     font-size: 0.7rem;
     letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
   }
   .item .s { color: var(--muted); font-weight: 500; letter-spacing: 0.22em; }
-  .item .p { color: var(--fg); font-weight: 400; }
-  .item .c { color: var(--muted); }
+  .item .p { color: var(--fg); }
   .item .c.up { color: var(--up); }
   .item .c.down { color: var(--down); }
   .item .c.up::before { content: "\25B2\00a0"; font-size: 0.55rem; }
   .item .c.down::before { content: "\25BC\00a0"; font-size: 0.55rem; }
 
   footer {
-    position: relative;
-    z-index: 1;
     display: flex;
     justify-content: space-between;
-    gap: 12px 24px;
     flex-wrap: wrap;
-    padding: 20px 28px;
+    gap: 12px 24px;
+    padding: 22px 28px;
     font-size: 0.6rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--faint);
   }
 
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: none; }
+  @keyframes intro {
+    from { opacity: 0; transform: scale(1.08); filter: blur(18px); }
+    to   { opacity: 1; transform: none; filter: blur(0); }
   }
-  @keyframes scroll {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
+  @keyframes drip {
+    0%   { transform: scaleY(0); opacity: 0; }
+    40%  { transform: scaleY(1); opacity: 1; }
+    100% { transform: scaleY(1) translateY(20px); opacity: 0; }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .track, .logo, .contact { animation: none; }
-    .card { transition: none; }
-  }
+  @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
   @media (max-width: 640px) {
-    main { padding: 16px 0 28px; }
+    .stage { height: 260vh; }
     .contact {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       width: 100%;
       gap: 10px;
       padding: 0 14px;
+      margin-top: 26vh;
     }
-    .card { padding: 14px 6px; gap: 8px; border-radius: 8px; }
+    .card { padding: 15px 6px; gap: 8px; border-radius: 10px; }
     .label { font-size: clamp(0.42rem, 1.9vw, 0.6rem); letter-spacing: 0.2em; padding-left: 0.2em; }
-    .mail { font-size: clamp(0.5rem, 2.55vw, 0.86rem); letter-spacing: 0; }
+    .mail { font-size: clamp(0.5rem, 2.55vw, 0.88rem); letter-spacing: 0; }
     .item { padding: 0 20px; }
-    footer { justify-content: center; text-align: center; font-size: 0.5rem; padding: 16px 14px; }
+    footer { justify-content: center; text-align: center; font-size: 0.5rem; padding: 18px 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage { height: auto; }
+    .sticky { position: relative; flex-direction: column; height: auto; min-height: 100svh; padding: 40px 0; }
+    .logo-wrap { position: relative; transform: none; opacity: 1; filter: none; }
+    .logo, .hint i, .track { animation: none; }
+    .card { opacity: 1; transform: none; filter: none; pointer-events: auto; }
+    .contact { margin-top: 0; }
+    .hint { display: none; }
   }
 </style>
 </head>
 <body>
-  <main>
-    <img class="logo" src="smr.png" alt="SMR Equity">
+  <section class="stage" id="stage">
+    <div class="sticky">
 
-    <section class="contact">
-      <a class="card" href="mailto:invest@smr-equity.com">
-        <span class="label">Business Inquiries</span>
-        <span class="mail">invest@smr-equity.com</span>
-      </a>
-      <a class="card" href="mailto:contact@smr-equity.com">
-        <span class="label">Contact Inquiries</span>
-        <span class="mail">contact@smr-equity.com</span>
-      </a>
-    </section>
-  </main>
+      <div class="logo-wrap" id="logo">
+        <img class="logo" src="smr.png" alt="SMR Equity">
+      </div>
+
+      <div class="contact">
+        <a class="card" href="mailto:invest@smr-equity.com">
+          <span class="label">Business Inquiries</span>
+          <span class="mail">invest@smr-equity.com</span>
+        </a>
+        <a class="card" href="mailto:contact@smr-equity.com">
+          <span class="label">Contact Inquiries</span>
+          <span class="mail">contact@smr-equity.com</span>
+        </a>
+      </div>
+
+      <div class="hint" id="hint">Scroll<i></i></div>
+    </div>
+  </section>
 
   <div class="ticker" aria-label="Market prices">
     <div class="track" id="track"></div>
@@ -222,18 +257,74 @@
 <script>
   document.getElementById("yr").textContent = new Date().getFullYear();
 
+  // ---------- scroll choreography ----------
+  const stage = document.getElementById("stage");
+  const logo  = document.getElementById("logo");
+  const hint  = document.getElementById("hint");
+  const cards = [...document.querySelectorAll(".card")];
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const range = (p, a, b) => clamp((p - a) / (b - a));           // 0..1 inside [a,b]
+  const ease  = t => 1 - Math.pow(1 - t, 3);                       // easeOutCubic
+  const io    = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  let target = 0, current = 0;
+
+  function measure() {
+    const r = stage.getBoundingClientRect();
+    const total = stage.offsetHeight - innerHeight;
+    target = clamp(-r.top / total);
+  }
+
+  function frame() {
+    current += (target - current) * 0.12;                            // smooth follow
+    if (Math.abs(target - current) < 0.0005) current = target;
+    const p = current;
+    const vh = innerHeight;
+
+    // logo: shrink + rise, then soften
+    const a = io(range(p, 0, 0.55));
+    const ls = 1 - a * 0.42;
+    const ly = -a * vh * 0.2;
+    logo.style.setProperty("--ls", ls);
+    logo.style.setProperty("--ly", ly + "px");
+
+    // hint fades out immediately
+    hint.style.setProperty("--ho", 1 - range(p, 0, 0.08));
+
+    // cards: staggered blur-in
+    cards.forEach((c, i) => {
+      const t = ease(range(p, 0.32 + i * 0.08, 0.62 + i * 0.08));
+      c.style.setProperty("--co", t);
+      c.style.setProperty("--cy", (1 - t) * 60 + "px");
+      c.style.setProperty("--cs", 0.94 + t * 0.06);
+      c.style.setProperty("--cb", (1 - t) * 12 + "px");
+      c.style.setProperty("--pe", t > 0.6 ? "auto" : "none");
+    });
+
+    requestAnimationFrame(frame);
+  }
+
+  if (!reduce) {
+    addEventListener("scroll", measure, { passive: true });
+    addEventListener("resize", measure);
+    measure();
+    current = target;
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- ticker ----------
   const COINS = [
     ["bitcoin", "BTC"], ["ethereum", "ETH"], ["solana", "SOL"], ["ripple", "XRP"],
     ["binancecoin", "BNB"], ["cardano", "ADA"], ["dogecoin", "DOGE"], ["avalanche-2", "AVAX"],
     ["chainlink", "LINK"], ["polkadot", "DOT"], ["sui", "SUI"], ["tron", "TRX"]
   ];
   const track = document.getElementById("track");
-
   const fmt = v => {
     const d = v >= 100 ? 0 : v >= 1 ? 2 : 4;
     return "$" + v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
   };
-
   function render(data) {
     const html = COINS.map(([id, s]) => {
       const d = data && data[id];
@@ -243,7 +334,6 @@
     }).join("");
     track.innerHTML = html + html;
   }
-
   async function load() {
     try {
       const ids = COINS.map(c => c[0]).join(",");
@@ -254,7 +344,6 @@
       if (!track.innerHTML) render(null);
     }
   }
-
   render(null);
   load();
   setInterval(load, 60000);
