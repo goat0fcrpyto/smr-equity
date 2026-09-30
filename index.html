@@ -67,7 +67,7 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 56%;
+    top: 49%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -103,6 +103,13 @@
     font-style: italic;
     letter-spacing: 0.02em;
     color: var(--muted);
+  }
+  .qline {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
   }
   .quote cite {
     font-style: normal;
@@ -184,15 +191,45 @@
   }
 
   /* ticker inside the stage, bottom */
+  .bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px 16px;
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .dot {
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #c9a54a;
+    box-shadow: 0 0 0 0 rgba(201, 165, 74, .5);
+    animation: pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(201, 165, 74, .5); }
+    70%  { box-shadow: 0 0 0 7px rgba(201, 165, 74, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(201, 165, 74, 0); }
+  }
   .ticker {
     position: relative;
-    align-self: stretch;
-    margin: 0 -24px;
-    max-width: none;
     overflow: hidden;
     white-space: nowrap;
     border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
     mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   }
@@ -282,14 +319,14 @@
   @media (max-width: 640px) {
     .stage { height: 250vh; }
     .logo { width: 180vw; max-width: none; }
-    .content { top: 57%; gap: 28px; padding: 0 14px; }
-    .ticker { margin: 0 -14px; }
+    .content { top: 50%; gap: 30px; padding: 0 14px; }
     .quote q { font-size: 0.85rem; }
     .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .card { padding: 16px 6px; gap: 8px; border-radius: 12px; }
     .label { font-size: clamp(0.42rem, 1.8vw, 0.58rem); letter-spacing: 0.2em; padding-left: 0.2em; }
     .mail { font-size: clamp(0.52rem, 2.6vw, 0.88rem); letter-spacing: 0; }
     .item { padding: 0 18px; }
+    .status { font-size: 0.5rem; letter-spacing: 0.12em; gap: 8px; }
     footer { justify-content: center; text-align: center; font-size: 0.5rem; padding-left: 16px; padding-right: 16px; }
   }
   /* short landscape screens */
@@ -322,8 +359,7 @@
       <div class="content">
         <figure class="quote rv" id="quote">
           <span class="rule"></span>
-          <q>Built for volatility.</q>
-          <cite>&mdash; J.S</cite>
+          <span class="qline"><q>Built for volatility.</q><cite>&mdash; J.S</cite></span>
         </figure>
 
         <div class="cards">
@@ -336,8 +372,11 @@
             <span class="mail">contact@smr-equity.com</span>
           </a>
         </div>
+      </div>
 
-        <div class="ticker rv" aria-label="Market prices">
+      <div class="bottom rv">
+        <p class="status">Platform in development &middot; Launching soon</p>
+        <div class="ticker" aria-label="Market prices">
           <div class="track" id="track"></div>
         </div>
       </div>
@@ -388,7 +427,7 @@
     const a = inOut(range(p, 0, 0.5));
     const endScale = phone ? 0.68 : 0.52;
     logo.style.setProperty("--ls", 1 - a * (1 - endScale));
-    logo.style.setProperty("--ly", (-a * vh * (phone ? 0.16 : 0.15)).toFixed(1) + "px");
+    logo.style.setProperty("--ly", (-a * vh * (phone ? 0.23 : 0.22)).toFixed(1) + "px");
 
     hint.style.setProperty("--ho", 1 - range(p, 0, 0.06));
 
