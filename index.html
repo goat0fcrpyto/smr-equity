@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="SMR Equity">
 <meta name="theme-color" content="#000000">
 <title>SMR Equity</title>
@@ -12,13 +12,14 @@
 <style>
   :root {
     --bg: #000;
-    --fg: #f0f0f0;
-    --muted: #7c7c80;
-    --faint: #3d3d40;
+    --fg: #ededed;
+    --muted: #8a8a8f;
+    --dim: #55555a;
+    --faint: #2e2e32;
     --line: rgba(255, 255, 255, 0.09);
-    --line-hover: rgba(255, 255, 255, 0.24);
     --up: #4fae7c;
     --down: #c45c5c;
+    --ease: cubic-bezier(.16, 1, .3, 1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); }
@@ -26,284 +27,381 @@
     color: var(--fg);
     font-family: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
   }
+  a { color: inherit; text-decoration: none; }
 
-  /* scroll stage: tall section, sticky viewport inside */
-  .stage { position: relative; height: 320vh; }
+  /* ---------- stage ---------- */
+  .stage { position: relative; height: 300vh; }
   .sticky {
     position: sticky;
     top: 0;
     height: 100vh;
     height: 100svh;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
-  .glow {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 120vmax;
-    height: 120vmax;
-    transform: translate(-50%, -50%) scale(var(--gs, 0.6));
-    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03) 45%, transparent 70%);
-    opacity: var(--go, 0.6);
-    pointer-events: none;
-    will-change: transform, opacity;
-  }
-
+  /* logo */
   .logo-wrap {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    transform: translate3d(0, var(--ly, 0px), 0) scale(var(--ls, 1));
     will-change: transform;
-    transform: translateY(var(--ly, 0)) scale(var(--ls, 1));
   }
   .logo {
-    width: min(1000px, 100vw, calc(100svh * 16 / 9));
+    width: min(1000px, 94vw, calc(100svh * 1.6));
     aspect-ratio: 16 / 9;
     object-fit: contain;
     display: block;
-    mix-blend-mode: lighten;
-    animation: intro 1.6s cubic-bezier(.16, 1, .3, 1) both;
+    user-select: none;
+    -webkit-user-drag: none;
+    animation: intro 1.8s var(--ease) both;
   }
 
-  .contact {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 290px));
-    gap: 16px;
+  /* content that appears */
+  .content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 49%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
     padding: 0 24px;
-    margin-top: 34vh;
+  }
+  .rv {
+    opacity: var(--o, 0);
+    transform: translate3d(0, var(--y, 40px), 0);
+    filter: blur(var(--b, 8px));
+    will-change: transform, opacity, filter;
+  }
+
+  /* quote */
+  .quote {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .quote .rule {
+    width: 28px;
+    height: 1px;
+    background: var(--dim);
+    margin-bottom: 6px;
+    transform: scaleX(var(--rx, 0));
+  }
+  .quote q {
+    quotes: "\201C" "\201D";
+    font-size: 0.95rem;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+  .quote cite {
+    font-style: normal;
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    padding-left: 0.32em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  /* contact cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 280px));
+    gap: 14px;
+    width: 100%;
+    justify-content: center;
   }
   .card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    padding: 22px 20px;
+    padding: 22px 16px;
+    border-radius: 14px;
     text-align: center;
-    text-decoration: none;
-    border: 1px solid var(--line);
-    border-radius: 12px;
     background: #000;
-    opacity: var(--co, 0);
-    transform: translateY(var(--cy, 60px)) scale(var(--cs, 0.94));
-    filter: blur(var(--cb, 12px));
+    isolation: isolate;
     pointer-events: var(--pe, none);
-    will-change: transform, opacity, filter;
   }
-  .card .inner { transition: transform .3s cubic-bezier(.16, 1, .3, 1); display: contents; }
-  .card:hover { border-color: var(--line-hover); }
+  .card::before {            /* border */
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background:
+      radial-gradient(180px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.35), transparent 70%),
+      var(--line);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+    opacity: .9;
+    transition: opacity .4s;
+  }
+  .card::after {             /* spotlight */
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.05), transparent 70%);
+    opacity: 0;
+    transition: opacity .4s;
+    z-index: -1;
+  }
+  .card:hover::after { opacity: 1; }
   .label {
     display: block;
     width: 100%;
     padding-left: 0.3em;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 500;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--dim);
+    transition: color .4s;
   }
+  .card:hover .label { color: var(--muted); }
   .mail {
     display: block;
     width: 100%;
     font-size: 0.88rem;
     font-weight: 300;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     color: var(--fg);
   }
 
+  /* ticker inside the stage, bottom */
+  .ticker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border-top: 1px solid var(--line);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .track { display: inline-flex; padding: 15px 0; animation: scroll 80s linear infinite; }
+  .ticker:hover .track { animation-play-state: paused; }
+  .item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 9px;
+    padding: 0 26px;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+  }
+  .item .s { color: var(--dim); font-weight: 500; letter-spacing: 0.22em; }
+  .item .p { color: var(--muted); }
+  .item .c.up { color: var(--up); }
+  .item .c.down { color: var(--down); }
+  .item .c.up::before { content: "\25B2\00a0"; font-size: 0.5rem; }
+  .item .c.down::before { content: "\25BC\00a0"; font-size: 0.5rem; }
+
+  /* scroll hint */
   .hint {
     position: absolute;
     left: 50%;
-    bottom: 32px;
+    bottom: calc(34px + env(safe-area-inset-bottom));
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    font-size: 0.55rem;
-    letter-spacing: 0.35em;
+    font-size: 0.52rem;
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
     text-transform: uppercase;
-    color: var(--faint);
+    color: var(--dim);
     opacity: var(--ho, 1);
-    transition: opacity .2s;
   }
   .hint i {
     width: 1px;
-    height: 40px;
+    height: 38px;
     background: linear-gradient(var(--muted), transparent);
-    animation: drip 2.2s ease-in-out infinite;
     transform-origin: top;
+    animation: drip 2.4s ease-in-out infinite;
   }
 
-  /* after the stage */
-  .ticker {
-    position: relative;
-    overflow: hidden;
-    white-space: nowrap;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  /* progress line top */
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 100%;
+    background: rgba(255,255,255,.35);
+    transform-origin: left;
+    transform: scaleX(var(--pp, 0));
+    z-index: 10;
+    pointer-events: none;
   }
-  .track { display: inline-flex; padding: 15px 0; animation: scroll 70s linear infinite; }
-  .ticker:hover .track { animation-play-state: paused; }
-  .item {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 0 28px;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    font-variant-numeric: tabular-nums;
-  }
-  .item .s { color: var(--muted); font-weight: 500; letter-spacing: 0.22em; }
-  .item .p { color: var(--fg); }
-  .item .c.up { color: var(--up); }
-  .item .c.down { color: var(--down); }
-  .item .c.up::before { content: "\25B2\00a0"; font-size: 0.55rem; }
-  .item .c.down::before { content: "\25BC\00a0"; font-size: 0.55rem; }
 
   footer {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px 24px;
-    padding: 22px 28px;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    gap: 10px 24px;
+    padding: 26px 28px calc(26px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    font-size: 0.56rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--faint);
   }
 
   @keyframes intro {
-    from { opacity: 0; transform: scale(1.08); filter: blur(18px); }
-    to   { opacity: 1; transform: none; filter: blur(0); }
+    from { opacity: 0; transform: scale(1.06); filter: blur(16px); }
+    to   { opacity: 1; transform: scale(1); filter: blur(0); }
   }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes drip {
     0%   { transform: scaleY(0); opacity: 0; }
     40%  { transform: scaleY(1); opacity: 1; }
-    100% { transform: scaleY(1) translateY(20px); opacity: 0; }
+    100% { transform: scaleY(1) translateY(18px); opacity: 0; }
   }
   @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
+  /* ---------- phone ---------- */
   @media (max-width: 640px) {
-    .stage { height: 260vh; }
-    .contact {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      width: 100%;
-      gap: 10px;
-      padding: 0 14px;
-      margin-top: 26vh;
-    }
-    .card { padding: 15px 6px; gap: 8px; border-radius: 10px; }
-    .label { font-size: clamp(0.42rem, 1.9vw, 0.6rem); letter-spacing: 0.2em; padding-left: 0.2em; }
-    .mail { font-size: clamp(0.5rem, 2.55vw, 0.88rem); letter-spacing: 0; }
-    .item { padding: 0 20px; }
-    footer { justify-content: center; text-align: center; font-size: 0.5rem; padding: 18px 14px; }
+    .stage { height: 250vh; }
+    .logo { width: 180vw; max-width: none; }
+    .content { top: 50%; gap: 30px; padding: 0 14px; }
+    .quote q { font-size: 0.85rem; }
+    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .card { padding: 16px 6px; gap: 8px; border-radius: 12px; }
+    .label { font-size: clamp(0.42rem, 1.8vw, 0.58rem); letter-spacing: 0.2em; padding-left: 0.2em; }
+    .mail { font-size: clamp(0.52rem, 2.6vw, 0.88rem); letter-spacing: 0; }
+    .item { padding: 0 18px; }
+    footer { justify-content: center; text-align: center; font-size: 0.5rem; padding-left: 16px; padding-right: 16px; }
+  }
+  /* short landscape screens */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .content { top: 46%; gap: 18px; }
+    .quote { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .stage { height: auto; }
-    .sticky { position: relative; flex-direction: column; height: auto; min-height: 100svh; padding: 40px 0; }
-    .logo-wrap { position: relative; transform: none; opacity: 1; filter: none; }
-    .logo, .hint i, .track { animation: none; }
-    .card { opacity: 1; transform: none; filter: none; pointer-events: auto; }
-    .contact { margin-top: 0; }
-    .hint { display: none; }
+    .sticky { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 40px 0 80px; }
+    .logo-wrap, .content { position: relative; inset: auto; top: auto; transform: none; }
+    .logo, .hint, .hint i, .track { animation: none; }
+    .rv { opacity: 1; transform: none; filter: none; }
+    .quote .rule { transform: none; }
+    .card { pointer-events: auto; }
+    .hint, .progress { display: none; }
   }
 </style>
 </head>
 <body>
+  <div class="progress" id="progress"></div>
+
   <section class="stage" id="stage">
     <div class="sticky">
-
       <div class="logo-wrap" id="logo">
-        <img class="logo" src="smr.png" alt="SMR Equity">
+        <img class="logo" src="smr.png" alt="SMR Equity" draggable="false">
       </div>
 
-      <div class="contact">
-        <a class="card" href="mailto:invest@smr-equity.com">
-          <span class="label">Business Inquiries</span>
-          <span class="mail">invest@smr-equity.com</span>
-        </a>
-        <a class="card" href="mailto:contact@smr-equity.com">
-          <span class="label">Contact Inquiries</span>
-          <span class="mail">contact@smr-equity.com</span>
-        </a>
+      <div class="content">
+        <figure class="quote rv" id="quote">
+          <span class="rule"></span>
+          <q>Built for volatility.</q>
+          <cite>&mdash; J.S</cite>
+        </figure>
+
+        <div class="cards">
+          <a class="card rv" href="mailto:invest@smr-equity.com">
+            <span class="label">Business Inquiries</span>
+            <span class="mail">invest@smr-equity.com</span>
+          </a>
+          <a class="card rv" href="mailto:contact@smr-equity.com">
+            <span class="label">Contact Inquiries</span>
+            <span class="mail">contact@smr-equity.com</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="ticker rv" aria-label="Market prices">
+        <div class="track" id="track"></div>
       </div>
 
       <div class="hint" id="hint">Scroll<i></i></div>
     </div>
   </section>
 
-  <div class="ticker" aria-label="Market prices">
-    <div class="track" id="track"></div>
-  </div>
-
   <footer>
     <span>&copy; <span id="yr"></span> SMR Equity. All rights reserved.</span>
-    <span>Market data is for information only. Not investment advice.</span>
+    <span>Market data for information only. Not investment advice.</span>
   </footer>
 
 <script>
   document.getElementById("yr").textContent = new Date().getFullYear();
 
-  // ---------- scroll choreography ----------
-  const stage = document.getElementById("stage");
-  const logo  = document.getElementById("logo");
-  const hint  = document.getElementById("hint");
-  const cards = [...document.querySelectorAll(".card")];
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const stage = document.getElementById("stage");
+  const logo = document.getElementById("logo");
+  const hint = document.getElementById("hint");
+  const quote = document.getElementById("quote");
+  const progress = document.getElementById("progress");
+  const items = [...document.querySelectorAll(".rv")];   // quote, card, card, ticker
 
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-  const range = (p, a, b) => clamp((p - a) / (b - a));           // 0..1 inside [a,b]
-  const ease  = t => 1 - Math.pow(1 - t, 3);                       // easeOutCubic
-  const io    = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const range = (p, a, b) => clamp((p - a) / (b - a));
+  const outCubic = t => 1 - Math.pow(1 - t, 3);
+  const inOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-  let target = 0, current = 0;
+  let target = 0, current = 0, running = false;
 
   function measure() {
-    const r = stage.getBoundingClientRect();
     const total = stage.offsetHeight - innerHeight;
-    target = clamp(-r.top / total);
+    target = clamp(-stage.getBoundingClientRect().top / total);
+    progress.style.setProperty("--pp", clamp(scrollY / (document.documentElement.scrollHeight - innerHeight)));
+    if (!running) { running = true; requestAnimationFrame(frame); }
   }
 
   function frame() {
-    current += (target - current) * 0.12;                            // smooth follow
-    if (Math.abs(target - current) < 0.0005) current = target;
+    current += (target - current) * 0.1;
+    if (Math.abs(target - current) < 0.0004) current = target;
     const p = current;
     const vh = innerHeight;
+    const phone = innerWidth <= 640;
 
-    // logo: shrink + rise, then soften
-    const a = io(range(p, 0, 0.55));
-    const ls = 1 - a * 0.42;
-    const ly = -a * vh * 0.2;
-    logo.style.setProperty("--ls", ls);
-    logo.style.setProperty("--ly", ly + "px");
+    // logo: shrink and rise
+    const a = inOut(range(p, 0, 0.5));
+    const endScale = phone ? 0.68 : 0.52;
+    logo.style.setProperty("--ls", 1 - a * (1 - endScale));
+    logo.style.setProperty("--ly", (-a * vh * (phone ? 0.23 : 0.22)).toFixed(1) + "px");
 
-    // hint fades out immediately
-    hint.style.setProperty("--ho", 1 - range(p, 0, 0.08));
+    hint.style.setProperty("--ho", 1 - range(p, 0, 0.06));
 
-    // cards: staggered blur-in
-    cards.forEach((c, i) => {
-      const t = ease(range(p, 0.32 + i * 0.08, 0.62 + i * 0.08));
-      c.style.setProperty("--co", t);
-      c.style.setProperty("--cy", (1 - t) * 60 + "px");
-      c.style.setProperty("--cs", 0.94 + t * 0.06);
-      c.style.setProperty("--cb", (1 - t) * 12 + "px");
-      c.style.setProperty("--pe", t > 0.6 ? "auto" : "none");
+    // staggered blur-in
+    items.forEach((el, i) => {
+      const t = outCubic(range(p, 0.3 + i * 0.07, 0.58 + i * 0.07));
+      el.style.setProperty("--o", t);
+      el.style.setProperty("--y", ((1 - t) * 40).toFixed(1) + "px");
+      el.style.setProperty("--b", ((1 - t) * 8).toFixed(2) + "px");
+      el.style.setProperty("--pe", t > 0.6 ? "auto" : "none");
     });
+    quote.style.setProperty("--rx", outCubic(range(p, 0.4, 0.7)));
 
-    requestAnimationFrame(frame);
+    if (current !== target) requestAnimationFrame(frame);
+    else running = false;
   }
 
   if (!reduce) {
@@ -311,7 +409,18 @@
     addEventListener("resize", measure);
     measure();
     current = target;
-    requestAnimationFrame(frame);
+    frame();
+  }
+
+  // card spotlight (mouse only)
+  if (matchMedia("(hover: hover)").matches) {
+    document.querySelectorAll(".card").forEach(c => {
+      c.addEventListener("pointermove", e => {
+        const r = c.getBoundingClientRect();
+        c.style.setProperty("--mx", (e.clientX - r.left) + "px");
+        c.style.setProperty("--my", (e.clientY - r.top) + "px");
+      });
+    });
   }
 
   // ---------- ticker ----------
