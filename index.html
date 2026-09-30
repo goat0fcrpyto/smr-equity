@@ -72,7 +72,7 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 49%;
+    top: 62%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -308,6 +308,62 @@
     color: var(--faint);
   }
 
+  footer a { color: var(--muted); transition: color .3s; }
+  footer a:hover { color: var(--fg); }
+  .fl { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; }
+
+  /* contact page */
+  .cpage {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 34px;
+    padding: 40px 20px calc(40px + env(safe-area-inset-bottom));
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .6s var(--ease), visibility 0s linear .6s;
+  }
+  .cpage.on { opacity: 1; visibility: visible; transition: opacity .6s var(--ease); }
+  .cpage h2 {
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .clist { display: flex; flex-direction: column; width: min(420px, 100%); border-top: 1px solid var(--line); }
+  .crow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 20px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .crow .label { width: auto; padding: 0; }
+  .crow .mail { width: auto; transition: color .3s; }
+  .crow:hover .mail { color: #fff; }
+  .close {
+    font-size: 0.56rem;
+    letter-spacing: 0.32em;
+    padding-left: 0.32em;
+    text-transform: uppercase;
+    color: var(--dim);
+    transition: color .3s;
+  }
+  .close:hover { color: var(--fg); }
+  @media (max-width: 640px) {
+    .fl { flex-direction: column; align-items: center; }
+    .crow { flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+    .crow .mail { font-size: 0.88rem; }
+  }
+
   @keyframes intro {
     from { opacity: 0; transform: scale(1.06); filter: blur(16px); }
     to   { opacity: 1; transform: scale(1); filter: blur(0); }
@@ -324,7 +380,7 @@
   @media (max-width: 640px) {
     .stage { height: 250vh; }
     .logo { width: 180vw; max-width: none; }
-    .content { top: 50%; gap: 30px; padding: 0 14px; }
+    .content { top: 58%; gap: 30px; padding: 0 14px; }
     .quote q { font-size: 0.85rem; }
     .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .card { padding: 16px 6px; gap: 8px; border-radius: 12px; }
@@ -366,17 +422,6 @@
           <span class="rule"></span>
           <span class="qline"><q>Built for volatility.</q><cite>&mdash; J.S</cite></span>
         </figure>
-
-        <div class="cards">
-          <a class="card rv" href="mailto:invest@smr-equity.com">
-            <span class="label">Business Inquiries</span>
-            <span class="mail">invest@smr-equity.com</span>
-          </a>
-          <a class="card rv" href="mailto:contact@smr-equity.com">
-            <span class="label">Contact Inquiries</span>
-            <span class="mail">contact@smr-equity.com</span>
-          </a>
-        </div>
       </div>
 
       <div class="bottom rv">
@@ -393,8 +438,23 @@
 
   <footer>
     <span>&copy; <span id="yr"></span> SMR Equity. All rights reserved.</span>
-    <span>Market data for information only. Not investment advice.</span>
+    <span class="fl"><a href="#contact">Contact</a><span>Market data for information only. Not investment advice.</span></span>
   </footer>
+
+  <section class="cpage" id="contact" aria-label="Contact">
+    <h2>Contact</h2>
+    <div class="clist">
+      <a class="crow" href="mailto:invest@smr-equity.com">
+        <span class="label">Business Inquiries</span>
+        <span class="mail">invest@smr-equity.com</span>
+      </a>
+      <a class="crow" href="mailto:contact@smr-equity.com">
+        <span class="label">Contact Inquiries</span>
+        <span class="mail">contact@smr-equity.com</span>
+      </a>
+    </div>
+    <a class="close" href="#">&larr; Back</a>
+  </section>
 
 <script>
   document.getElementById("yr").textContent = new Date().getFullYear();
@@ -430,9 +490,9 @@
 
     // logo: shrink and rise
     const a = inOut(range(p, 0, 0.5));
-    const endScale = phone ? 0.68 : 0.52;
+    const endScale = phone ? 0.8 : 0.62;
     logo.style.setProperty("--ls", 1 - a * (1 - endScale));
-    logo.style.setProperty("--ly", (-a * vh * (phone ? 0.23 : 0.22)).toFixed(1) + "px");
+    logo.style.setProperty("--ly", (-a * vh * (phone ? 0.1 : 0.1)).toFixed(1) + "px");
 
     hint.style.setProperty("--ho", 1 - range(p, 0, 0.06));
 
@@ -502,6 +562,13 @@
   render(null);
   load();
   setInterval(load, 60000);
+  // contact page
+  const cpage = document.getElementById("contact");
+  const openC = () => { cpage.classList.add("on"); document.body.style.overflow = "hidden"; };
+  const closeC = () => { cpage.classList.remove("on"); document.body.style.overflow = ""; };
+  document.querySelector('footer a[href="#contact"]').addEventListener("click", e => { e.preventDefault(); openC(); });
+  document.querySelector(".close").addEventListener("click", e => { e.preventDefault(); closeC(); });
+  addEventListener("keydown", e => { if (e.key === "Escape") closeC(); });
 </script>
 </body>
 </html>
