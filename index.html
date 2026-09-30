@@ -384,8 +384,8 @@
   /* ---------- phone ---------- */
   @media (max-width: 640px) {
     .stage { height: 250vh; }
-    .logo { width: 180vw; max-width: none; }
-    .content { top: 58%; gap: 30px; padding: 0 14px; }
+    .logo { width: 150vw; max-width: none; }
+    .content { gap: 30px; padding: 0 14px; }
     .quote q { font-size: 0.85rem; }
     .quote .rule { display: none; }
     .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -423,13 +423,13 @@
         <img class="logo" src="smr.png" alt="SMR Equity" draggable="false">
       </div>
 
-      <div class="content">
+      <div class="content" id="content">
         <figure class="quote rv" id="quote">
           <span class="qline"><q>Built for volatility.</q><cite>&mdash; J.S</cite></span>
         </figure>
       </div>
 
-      <div class="bottom rv">
+      <div class="bottom rv" id="bottom">
         <p class="status">Platform in development &middot; Launching soon</p>
         <div class="ticker" aria-label="Market prices">
           <div class="track" id="track"></div>
@@ -479,6 +479,31 @@
 
   let target = 0, current = 0, running = false;
 
+  // final layout: logo + quote centred in the space above the bottom bar,
+  // same proportions on phone and laptop
+  const img = logo.querySelector("img");
+  const content = document.getElementById("content");
+  const bottom = document.getElementById("bottom");
+  const L = { endScale: 0.62, ly: 0 };
+  const VISIBLE = 0.84;          // share of the image height the artwork uses
+  function layout() {
+    const vh = innerHeight;
+    const phone = innerWidth <= 640;
+    const imgH = img.offsetHeight;
+    const bottomH = bottom.offsetHeight;
+    const contentH = content.offsetHeight;
+    const gap = phone ? 28 : 36;
+    const room = vh - bottomH - (phone ? 48 : 64);
+    const want = phone ? 0.8 : 0.62;
+    const fit = (room - gap - contentH) / (imgH * VISIBLE);
+    L.endScale = Math.max(0.3, Math.min(want, fit));
+    const logoVis = imgH * VISIBLE * L.endScale;
+    const total = logoVis + gap + contentH;
+    const start = Math.max(20, (vh - bottomH - total) / 2);
+    L.ly = start + logoVis / 2 - vh / 2;
+    content.style.top = (start + logoVis + gap) + "px";
+  }
+
   function measure() {
     const total = stage.offsetHeight - innerHeight;
     target = clamp(-stage.getBoundingClientRect().top / total);
@@ -495,9 +520,8 @@
 
     // logo: shrink and rise
     const a = inOut(range(p, 0, 0.5));
-    const endScale = phone ? 0.8 : 0.62;
-    logo.style.setProperty("--ls", 1 - a * (1 - endScale));
-    logo.style.setProperty("--ly", (-a * vh * (phone ? 0.1 : 0.1)).toFixed(1) + "px");
+    logo.style.setProperty("--ls", 1 - a * (1 - L.endScale));
+    logo.style.setProperty("--ly", (a * L.ly).toFixed(1) + "px");
 
     hint.style.setProperty("--ho", 1 - range(p, 0, 0.06));
 
@@ -517,7 +541,12 @@
 
   if (!reduce) {
     addEventListener("scroll", measure, { passive: true });
-    addEventListener("resize", measure);
+    const relayout = () => { layout(); measure(); };
+    addEventListener("resize", relayout);
+    addEventListener("orientationchange", relayout);
+    if (!img.complete) img.addEventListener("load", relayout);
+    document.fonts && document.fonts.ready.then(relayout);
+    layout();
     measure();
     current = target;
     frame();
