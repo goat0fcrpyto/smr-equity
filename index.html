@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMR Equity</title>
+<style>
+  :root {
+    --bg: #000000;
+    --fg: #ededed;
+    --muted: #6e6e6e;
+    --faint: #3a3a3a;
+    --line: #161616;
+    --up: #4fae7c;
+    --down: #c45c5c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--fg);
+    font-family: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px 32px;
+    text-align: center;
+  }
+  img.logo {
+    width: min(640px, 88vw);
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    display: block;
+  }
+  .tagline {
+    margin-top: -20px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .contact {
+    margin-top: 64px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 220px));
+    gap: 0 64px;
+  }
+  .contact div { display: flex; flex-direction: column; gap: 8px; }
+  .label {
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .contact a, .contact span.val {
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .contact a:hover { color: var(--fg); }
+
+  /* Ticker */
+  .ticker {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    white-space: nowrap;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .track {
+    display: inline-flex;
+    padding: 14px 0;
+    animation: scroll 60s linear infinite;
+  }
+  .ticker:hover .track { animation-play-state: paused; }
+  .item {
+    display: inline-flex;
+    gap: 10px;
+    padding: 0 28px;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+  }
+  .item .s { color: var(--muted); letter-spacing: 0.2em; }
+  .item .p { color: var(--fg); }
+  .item .c { color: var(--muted); }
+  .item .c.up { color: var(--up); }
+  .item .c.down { color: var(--down); }
+  @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .track { animation: none; } }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 20px 24px;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  @media (max-width: 560px) {
+    .contact { grid-template-columns: 1fr; gap: 32px; }
+    footer { justify-content: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+  <main>
+    <img class="logo" src="smr.png" alt="SMR Equity">
+
+    <section class="contact">
+      <div>
+        <span class="label">Business Inquiries</span>
+        <a href="mailto:invest@smr-equity.com">invest@smr-equity.com</a>
+      </div>
+      <div>
+        <span class="label">Contact Inquiries</span>
+        <a href="mailto:contact@smr-equity.com">contact@smr-equity.com</a>
+      </div>
+    </section>
+  </main>
+
+  <div class="ticker" aria-label="Market prices">
+    <div class="track" id="track"></div>
+  </div>
+
+  <footer>
+    <span>&copy; <span id="yr"></span> SMR Equity. All rights reserved.</span>
+    <span>Market data is for information only. Not investment advice.</span>
+  </footer>
+
+<script>
+  document.getElementById("yr").textContent = new Date().getFullYear();
+
+  const COINS = [
+    ["bitcoin","BTC"], ["ethereum","ETH"], ["solana","SOL"], ["ripple","XRP"],
+    ["binancecoin","BNB"], ["cardano","ADA"], ["dogecoin","DOGE"], ["avalanche-2","AVAX"],
+    ["chainlink","LINK"], ["polkadot","DOT"], ["sui","SUI"], ["tron","TRX"]
+  ];
+  const track = document.getElementById("track");
+
+  function fmt(v) {
+    const d = v >= 100 ? 0 : v >= 1 ? 2 : 4;
+    return v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  function render(data) {
+    const html = COINS.map(([id, s]) => {
+      const d = data && data[id];
+      if (!d) return `<span class="item"><span class="s">${s}</span><span class="p">—</span></span>`;
+      const c = d.usd_24h_change ?? 0;
+      const cls = c >= 0 ? "up" : "down";
+      return `<span class="item"><span class="s">${s}</span><span class="p">${fmt(d.usd)}</span><span class="c ${cls}">${c >= 0 ? "+" : ""}${c.toFixed(2)}%</span></span>`;
+    }).join("");
+    track.innerHTML = html + html; // doubled for seamless loop
+  }
+
+  async function load() {
+    try {
+      const ids = COINS.map(c => c[0]).join(",");
+      const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+      if (!r.ok) throw new Error(r.status);
+      render(await r.json());
+    } catch (e) {
+      if (!track.innerHTML) render(null);
+    }
+  }
+  render(null);
+  load();
+  setInterval(load, 60000);
+</script>
+</body>
+</html>
