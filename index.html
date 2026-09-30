@@ -50,6 +50,7 @@
   /* logo */
   .logo-wrap {
     position: absolute;
+    overflow: hidden;
     inset: 0;
     display: flex;
     align-items: center;
@@ -65,6 +66,10 @@
     user-select: none;
     -webkit-user-drag: none;
     animation: intro 1.8s var(--ease) both;
+    mix-blend-mode: lighten;          /* dunkler Bildhintergrund verschmilzt mit Schwarz */
+    backface-visibility: hidden;      /* keine Kanten beim Skalieren am Handy */
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 78%, transparent 100%);
+            mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 78%, transparent 100%);
   }
 
   /* content that appears */
@@ -382,6 +387,7 @@
     .logo { width: 180vw; max-width: none; }
     .content { top: 58%; gap: 30px; padding: 0 14px; }
     .quote q { font-size: 0.85rem; }
+    .quote .rule { display: none; }
     .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .card { padding: 16px 6px; gap: 8px; border-radius: 12px; }
     .label { font-size: clamp(0.42rem, 1.8vw, 0.58rem); letter-spacing: 0.2em; padding-left: 0.2em; }
@@ -419,7 +425,6 @@
 
       <div class="content">
         <figure class="quote rv" id="quote">
-          <span class="rule"></span>
           <span class="qline"><q>Built for volatility.</q><cite>&mdash; J.S</cite></span>
         </figure>
       </div>
