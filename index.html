@@ -28,6 +28,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
   body {
     color: var(--fg);
     font-family: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -131,6 +132,57 @@
     color: var(--muted);
   }
 
+  /* model trio under the quote */
+  .trio {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 300px));
+    gap: 14px;
+    width: 100%;
+    justify-content: center;
+    pointer-events: var(--pe, none);
+  }
+  .tcard {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 18px 12px 12px;
+    border-radius: 14px;
+    background: #000;
+    isolation: isolate;
+    text-align: left;
+  }
+  .tcard::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background:
+      radial-gradient(180px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.4), transparent 70%),
+      var(--line);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+  }
+  .tcard img {
+    flex: none;
+    width: 88px;
+    height: 88px;
+    border-radius: 9px;
+    object-fit: cover;
+    image-rendering: pixelated;
+    opacity: .85;
+    transition: opacity .6s var(--ease);
+  }
+  .tcard:hover img { opacity: 1; }
+  .tcard div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .tcard .label { padding: 0; }
+  .tcard b { font-size: 0.98rem; font-weight: 400; letter-spacing: 0.04em; }
+  .tcard i { font-size: 0.78rem; font-weight: 300; color: var(--muted); }
+  .tcard:hover .label { color: var(--muted); }
+
   /* contact cards */
   .cards {
     display: grid;
@@ -201,13 +253,7 @@
   }
 
   /* ticker inside the stage, bottom */
-  .bottom {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+  .bottom { padding-top: 26px; }
   .status {
     display: flex;
     align-items: center;
@@ -300,6 +346,114 @@
     pointer-events: none;
   }
 
+
+  /* ---------- model stack ---------- */
+  .models {
+    position: relative;
+    padding: clamp(80px, 14vh, 150px) 24px clamp(70px, 12vh, 130px);
+    border-top: 1px solid var(--line);
+  }
+  .models-in { width: min(1120px, 100%); margin: 0 auto; }
+  .mv {
+    opacity: 0;
+    transform: translate3d(0, 34px, 0);
+    filter: blur(8px);
+    transition: opacity 1.1s var(--ease), transform 1.1s var(--ease), filter 1.1s var(--ease);
+    transition-delay: var(--d, 0s);
+  }
+  .mv.in { opacity: 1; transform: none; filter: none; }
+  .m-head { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; margin-bottom: clamp(44px, 8vh, 80px); }
+  .eyebrow {
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .m-head h2 {
+    font-size: clamp(1.5rem, 4.2vw, 2.6rem);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .m-head p {
+    max-width: 46ch;
+    font-size: 0.92rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .m-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .model {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    background: #000;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .model::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background:
+      radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.4), transparent 70%),
+      var(--line);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .model figure { position: relative; aspect-ratio: 1; background: #000; overflow: hidden; }
+  .model img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    image-rendering: pixelated;
+    opacity: .82;
+    transform: scale(1.01);
+    transition: opacity .8s var(--ease), transform 1.6s var(--ease);
+  }
+  .model:hover img { opacity: 1; transform: scale(1.045); }
+  .model figure::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 55%, #000 100%);
+    pointer-events: none;
+  }
+  .m-no {
+    position: absolute;
+    top: 16px;
+    left: 18px;
+    z-index: 1;
+    font-size: 0.56rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: #fff;
+    mix-blend-mode: difference;
+    font-variant-numeric: tabular-nums;
+  }
+  .m-body { display: flex; flex-direction: column; gap: 12px; padding: 4px 22px 24px; flex: 1; }
+  .m-role { font-size: 0.56rem; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); }
+  .m-name { font-size: 1.25rem; font-weight: 400; letter-spacing: 0.04em; }
+  .m-line { font-size: 0.95rem; font-weight: 300; font-style: italic; color: var(--fg); line-height: 1.5; }
+  .m-text { font-size: 0.84rem; font-weight: 300; line-height: 1.7; color: var(--muted); text-wrap: pretty; }
+  @media (max-width: 900px) {
+    .m-grid { grid-template-columns: minmax(0, 440px); justify-content: center; gap: 12px; }
+  }
+  @media (max-width: 640px) {
+    .models { padding-left: 16px; padding-right: 16px; }
+  }
+
   footer {
     display: flex;
     justify-content: space-between;
@@ -389,6 +543,13 @@
     .quote q { font-size: 0.85rem; }
     .quote .rule { display: none; }
     .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .tcard { flex-direction: column; align-items: stretch; gap: 9px; padding: 7px 7px 11px; border-radius: 12px; text-align: center; }
+    .tcard img { width: 100%; height: auto; aspect-ratio: 1; border-radius: 7px; }
+    .tcard div { gap: 4px; }
+    .tcard .label { font-size: 0.4rem; letter-spacing: 0.16em; }
+    .tcard b { font-size: clamp(0.6rem, 3vw, 0.8rem); letter-spacing: 0.02em; }
+    .tcard i { display: none; }
     .card { padding: 16px 6px; gap: 8px; border-radius: 12px; }
     .label { font-size: clamp(0.42rem, 1.8vw, 0.58rem); letter-spacing: 0.2em; padding-left: 0.2em; }
     .mail { font-size: clamp(0.52rem, 2.6vw, 0.88rem); letter-spacing: 0; }
@@ -400,6 +561,9 @@
   @media (max-height: 520px) and (orientation: landscape) {
     .content { top: 46%; gap: 18px; }
     .quote { display: none; }
+    .tcard { padding: 8px 14px 8px 8px; }
+    .tcard img { width: 52px; height: 52px; }
+    .tcard i { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -409,8 +573,10 @@
     .logo, .hint, .hint i, .track { animation: none; }
     .rv { opacity: 1; transform: none; filter: none; }
     .quote .rule { transform: none; }
-    .card { pointer-events: auto; }
+    .card, .trio { pointer-events: auto; }
     .hint, .progress { display: none; }
+    .mv { opacity: 1; transform: none; filter: none; transition: none; }
+    .model img { transition: none; }
   }
 </style>
 </head>
@@ -427,19 +593,77 @@
         <figure class="quote rv" id="quote">
           <span class="qline"><q>Built for volatility.</q><cite>&mdash; J.S</cite></span>
         </figure>
+
+        <nav class="trio rv" id="trio" aria-label="Models">
+          <a class="tcard" href="#models">
+            <img src="ki_sentinel.gif" alt="" width="88" height="88" decoding="async">
+            <div><span class="label">Risk Filter</span><b>SMR Sentinel</b><i>The gatekeeper.</i></div>
+          </a>
+          <a class="tcard" href="#models">
+            <img src="ki_evolve.gif" alt="" width="88" height="88" decoding="async">
+            <div><span class="label">Adaptive Model</span><b>SMR Evolve</b><i>It forgets what stopped working.</i></div>
+          </a>
+          <a class="tcard" href="#models">
+            <img src="ki_verdict.gif" alt="" width="88" height="88" decoding="async">
+            <div><span class="label">High Conviction</span><b>SMR Verdict</b><i>Silent, until it is certain.</i></div>
+          </a>
+        </nav>
       </div>
 
-      <div class="bottom rv" id="bottom">
-        <p class="status">Platform in development &middot; Launching soon</p>
-        <div class="ticker" aria-label="Market prices">
-          <div class="track" id="track"></div>
-        </div>
-      </div>
 
 
       <div class="hint" id="hint">Scroll<i></i></div>
     </div>
   </section>
+
+  <section class="models" id="models" aria-labelledby="models-title">
+    <div class="models-in">
+      <header class="m-head">
+        <span class="eyebrow mv">Model Stack</span>
+        <h2 class="mv" id="models-title" style="--d:.08s">Nothing trades unscored.</h2>
+        <p class="mv" style="--d:.16s">Three proprietary models read every setup before capital moves. Each one is frozen, then judged only on trades it has never seen.</p>
+      </header>
+
+      <div class="m-grid">
+        <article class="model mv">
+          <figure><span class="m-no">01</span><img src="ki_sentinel.gif" alt="" width="320" height="320" loading="lazy" decoding="async"></figure>
+          <div class="m-body">
+            <span class="m-role">Risk Filter</span>
+            <h3 class="m-name">SMR Sentinel</h3>
+            <p class="m-line">The gatekeeper.</p>
+            <p class="m-text">A frozen baseline that scores every entry and turns away seven out of ten. Its job is not to find winners. Its job is to make sure the losers never get in.</p>
+          </div>
+        </article>
+
+        <article class="model mv" style="--d:.1s">
+          <figure><span class="m-no">02</span><img src="ki_evolve.gif" alt="" width="320" height="320" loading="lazy" decoding="async"></figure>
+          <div class="m-body">
+            <span class="m-role">Adaptive Model</span>
+            <h3 class="m-name">SMR Evolve</h3>
+            <p class="m-line">It forgets what stopped working.</p>
+            <p class="m-text">Retrained every morning on everything the market did the day before. Each version is frozen at birth and measured against the one that came before it. Patterns that fade are dropped without sentiment.</p>
+          </div>
+        </article>
+
+        <article class="model mv" style="--d:.2s">
+          <figure><span class="m-no">03</span><img src="ki_verdict.gif" alt="" width="320" height="320" loading="lazy" decoding="async"></figure>
+          <div class="m-body">
+            <span class="m-role">High Conviction</span>
+            <h3 class="m-name">SMR Verdict</h3>
+            <p class="m-line">Silent, until it is certain.</p>
+            <p class="m-text">The same mind as Sentinel with a far higher bar. Verdict passes on almost everything and speaks only when the score sits at the very top. Few trades. No hesitation.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div class="bottom" id="bottom">
+    <p class="status">Platform in development &middot; Launching soon</p>
+    <div class="ticker" aria-label="Market prices">
+      <div class="track" id="track"></div>
+    </div>
+  </div>
 
   <footer>
     <span>&copy; <span id="yr"></span> SMR Equity. All rights reserved.</span>
@@ -490,7 +714,7 @@
     const vh = innerHeight;
     const phone = innerWidth <= 640;
     const imgH = img.offsetHeight;
-    const bottomH = bottom.offsetHeight;
+    const bottomH = bottom.closest(".sticky") ? bottom.offsetHeight : 0;
     const contentH = content.offsetHeight;
     const gap = phone ? 28 : 36;
     const room = vh - bottomH - (phone ? 48 : 64);
@@ -554,7 +778,26 @@
 
   // card spotlight (mouse only)
   if (matchMedia("(hover: hover)").matches) {
-    document.querySelectorAll(".card").forEach(c => {
+    document.querySelectorAll(".card, .tcard").forEach(c => {
+      c.addEventListener("pointermove", e => {
+        const r = c.getBoundingClientRect();
+        c.style.setProperty("--mx", (e.clientX - r.left) + "px");
+        c.style.setProperty("--my", (e.clientY - r.top) + "px");
+      });
+    });
+  }
+
+  // model stack: reveal on scroll + border spotlight
+  const mvs = document.querySelectorAll(".mv");
+  if (reduce || !("IntersectionObserver" in window)) mvs.forEach(el => el.classList.add("in"));
+  else {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }), { threshold: 0.15, rootMargin: "0px 0px -6% 0px" });
+    mvs.forEach(el => io.observe(el));
+  }
+  if (matchMedia("(hover: hover)").matches) {
+    document.querySelectorAll(".model").forEach(c => {
       c.addEventListener("pointermove", e => {
         const r = c.getBoundingClientRect();
         c.style.setProperty("--mx", (e.clientX - r.left) + "px");
