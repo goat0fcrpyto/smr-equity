@@ -643,6 +643,41 @@
   /* ---------- Sternenflug + SMR im Bild ---------- */
   .lineage canvas { position: absolute; left: -24px; right: -24px; top: -40px; bottom: -30px; width: calc(100% + 48px); height: calc(100% + 70px); pointer-events: none; }
 
+
+  /* ---------- Aquila wie die anderen Modelle, nur groesser ---------- */
+  .apex { border-radius: 14px; box-shadow: none; }
+  .apex::before {
+    inset: 0; animation: none; padding: 1px; border-radius: inherit;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.4), transparent 70%), var(--line);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; z-index: 2; pointer-events: none;
+  }
+  .apex::after, .a-mark, .apex .corner, .apex figure .scan, .a-heritage::before { display: none; }
+  .apex figure img { filter: none; mix-blend-mode: normal; opacity: .82; transform: scale(1.01); transition: opacity .8s var(--ease), transform 1.6s var(--ease); }
+  .apex:hover figure img { opacity: 1; transform: scale(1.045); }
+  .apex figure::after { display: block; content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 60%, #000 100%); pointer-events: none; }
+  .a-name { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--fg); animation: none; font-weight: 400; letter-spacing: 0.04em; font-size: clamp(1.8rem, 3.6vw, 2.5rem); line-height: 1.1; }
+  .a-line { font-size: 1rem; }
+  .a-heritage b { font-size: 0.84rem; }
+  @media (max-width: 900px) {
+    .apex figure::after { background: linear-gradient(transparent 55%, #000 100%); }
+    .lineage { height: 110px; }
+  }
+
+  /* ---------- Live-Terminal eingebettet statt als Fenster ---------- */
+  .term { background: transparent; border-radius: 0; margin-top: clamp(34px, 7vh, 70px); opacity: .9; }
+  .term::before { display: none; }
+  .term-h { display: none; }
+  .term-h span:last-child { display: none; }
+  .term-b { width: min(760px, 100%); margin: 0 auto; padding: 0; height: 240px; -webkit-mask-image: linear-gradient(transparent, #000 18%); mask-image: linear-gradient(transparent, #000 18%); }
+  @media (max-width: 640px) { .term-b { padding: 0; height: 200px; } }
+
+  .term .tl { color: #a9a9ae; }
+  .term .tl.dim { color: #6c6c72; }
+  .term .tl .ts { color: #4a4a50; }
+  .term .tl .sr { color: #7c7c82; }
+  .term .tl.hi, .term .tl .sr.k { color: #f2f2f2; }
+
   footer {
     display: flex;
     justify-content: space-between;
@@ -1067,8 +1102,10 @@
     }
     const src = () => { const pad = 24, w = W - 2 * pad, one = innerWidth <= 900; return one ? [pad + w * .5, pad + w * .5, pad + w * .5] : [pad + w / 6, pad + w / 2, pad + w * 5 / 6]; };
     function spawn() {
-      const sx = src()[Math.floor(Math.random() * 3)] + (Math.random() - .5) * 60;
-      fly.push({ sx, sy: 40 + Math.random() * 6, t: 0, d: 1.6 + Math.random() * 1.4, r: .8 + Math.random() * 1.4, bend: (Math.random() - .5) * 120, tail: [] });
+      const one = innerWidth <= 900;
+      const sx = one ? 30 + Math.random() * (W - 60) : src()[Math.floor(Math.random() * 3)] + (Math.random() - .5) * 60;
+      fly.push({ sx, sy: one ? 20 + Math.random() * 10 : 40 + Math.random() * 6, t: 0, d: one ? 1.8 + Math.random() * 1.2 : 1.6 + Math.random() * 1.4,
+                 r: one ? .5 + Math.random() * .7 : .8 + Math.random() * 1.4, bend: (Math.random() - .5) * (one ? 40 : 120), tail: [] });
     }
     function pos(f, t) {
       const ex = W / 2, ey = H - 30, e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -1081,15 +1118,15 @@
       ctx.globalAlpha = a; ctx.fillStyle = "#fff";
       ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
       ctx.globalAlpha = a * .55; ctx.fillRect(x - r * 4, y - .35, r * 8, .7); ctx.fillRect(x - .35, y - r * 4, .7, r * 8);
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r * 7); g.addColorStop(0, "rgba(255,255,255,.18)"); g.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.globalAlpha = a; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 7, 0, 6.283); ctx.fill();
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r * 5); g.addColorStop(0, "rgba(255,255,255,.18)"); g.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.globalAlpha = a; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 5, 0, 6.283); ctx.fill();
     }
     function frame(ts) {
       if (!run) return;
       const dt = Math.min(.05, (ts - (last || ts)) / 1000); last = ts;
       ctx.clearRect(0, 0, W, H);
       for (const b of bg) { b.p += dt * b.s; ctx.globalAlpha = .15 + .35 * (.5 + .5 * Math.sin(b.p)); ctx.fillStyle = "#fff"; ctx.fillRect(b.x, b.y, b.r, b.r); }
-      if (Math.random() < dt * 5) spawn();
+      if (Math.random() < dt * (innerWidth <= 900 ? 3 : 5)) spawn();
       const ex = W / 2, ey = H - 30;
       for (let i = fly.length - 1; i >= 0; i--) {
         const f = fly[i]; f.t += dt / f.d;
