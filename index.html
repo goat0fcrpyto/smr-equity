@@ -1084,13 +1084,13 @@
     function size() {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
       cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      bg = Array.from({ length: Math.round(W / 9) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.1 + .2, p: Math.random() * 6.28, s: .6 + Math.random() * 1.6 }));
+      bg = Array.from({ length: Math.round(W / 9) }, () => ({ x: Math.random() * W, y: 40 + Math.random() * (H - 40), r: Math.random() * 1.1 + .2, p: Math.random() * 6.28, s: .6 + Math.random() * 1.6 }));
     }
     const src = () => { const pad = 24, w = W - 2 * pad, one = innerWidth <= 900; return one ? [pad + w * .5, pad + w * .5, pad + w * .5] : [pad + w / 6, pad + w / 2, pad + w * 5 / 6]; };
     function spawn() {
       const one = innerWidth <= 900;
       const sx = one ? 30 + Math.random() * (W - 60) : src()[Math.floor(Math.random() * 3)] + (Math.random() - .5) * 60;
-      fly.push({ sx, sy: one ? 20 + Math.random() * 10 : 40 + Math.random() * 6, t: 0, d: one ? 1.8 + Math.random() * 1.2 : 1.6 + Math.random() * 1.4,
+      fly.push({ sx, sy: 40 + Math.random() * 6, t: 0, d: one ? 1.8 + Math.random() * 1.2 : 1.6 + Math.random() * 1.4,
                  r: one ? .5 + Math.random() * .7 : .8 + Math.random() * 1.4, bend: (Math.random() - .5) * (one ? 40 : 120), tail: [] });
     }
     function pos(f, t) {
